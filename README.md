@@ -1,119 +1,216 @@
-# 🧧 2026 微信春节祝福 Skill for OpenClaw 🦞
+# 🐲 wxclaw
 
-> **Skill 源代码已开源。**
-> 结果出来的时候，我自己都愣住了。
+> **春节给 200 个好友发祝福，手是不可能动的，这辈子都不可能动的。**
 
-[![OpenClaw](https://img.shields.io/badge/Powered%20by-OpenClaw-orange?style=flat-square&logo=anthropic)](https://claude.com/claude-code)
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![WeChat](https://img.shields.io/badge/WeChat-Mac-green?style=flat-square&logo=wechat&logoColor=white)](https://mac.weixin.qq.com/)
-[![Token Cost](https://img.shields.io/badge/Token%20Cost-ZERO-red?style=flat-square)](https://github.com/mr-kelly/wxclaw2026)
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-macOS-lightgrey?style=flat-square" />
+  <img src="https://img.shields.io/badge/WeChat-8.0+-07C160?style=flat-square&logo=wechat&logoColor=white" />
+  <img src="https://img.shields.io/badge/node-18+-339933?style=flat-square&logo=nodedotjs&logoColor=white" />
+</p>
 
----
+一个让你在 **不碰鼠标、不看屏幕、甚至不打开微信窗口** 的情况下，自动给指定好友发消息的 macOS 自动化工具。
 
-## 📖 The Story / 故事背景
-
-**农历新年，我让 OpenClaw 🦞 AI 在微信上逐个发了 9000 条祝福。**
-
-你猜 AI 消耗了多少 Token？
-
-每年过年，我最累的其实不是拜年。是回祝福。
-消息一条条进来。你不回，不太好意思。认真回，又真的很累。群发还有 200 人上限。
-
-所以今年我干脆让 **OpenClaw 🦞 AI** 帮我发。
-
-不是几十条。是 **9000 条**。
-
-而且我是晚饭饭桌上，一边啃长脚蟹 🤣 一边开始弄的。
-最后在打车路上完成。
-
-左手 **iPhone + Telegram + OpenClaw**，
-右手 **Honor 折叠屏 + 远程 Mac Mini 桌面**看运行。
-
-一路对话，它自己一路改到 15.0 版本。
-我连代码都没看，就直接跑起来了。
-
-跑了两个小时之后，我才突然想起一件事：
-*“这到底消耗了多少 token？”* （主要是担心破产 🤣）
-
-于是我去翻了 LLM 的日志后台，看模型调用记录和 token 统计。
-
-结果我当场愣住——
-
-# **0！ 0！ 0！**
-
-不是很少。是完全没有。
-
-然后它足足跑了 24 个小时……
-（现在还在按拼音 A、B、C、D 一路往下跑，已经跑到 J 了 🤣）
-
-不吃不喝。不睡觉。一直在后台干活。
-我睡了两觉。它还在发。
-
-**连续 24 小时。9000 条祝福。没有调用任何大模型。**
+*打工已经够累了，发消息这种事，就让脚本代劳吧。*
 
 ---
 
-## 🚀 Features / 核心功能
+## ✨ 功能一览
 
-本项目是 OpenClaw 的一个 Skill，专为 Mac 微信客户端设计，实现全自动化的智能祝福发送。
+| 需求 | 命令 |
+|------|------|
+| 给张三发消息 | `./run.sh --to "张三" --msg "今晚撸串？"` |
+| 给 50 个人群发祝福 | `./run.sh --to-file friends.txt --msg-file bless.txt` |
+| 先演习一遍 | `./run.sh --to-file friends.txt --msg "测试" --dry-run` |
 
-*   **🦞 0 Token Cost (零消耗)**
-    纯本地运行，不依赖昂贵的大模型 API，省钱又高效。
-*   **💾 State Persistence (状态记忆)**
-    自动记录发送进度，支持断点续传，不惧中断。
-*   **🛡️ Double De-duplication (双重防重)**
-    *   **Log Check**: 通过本地 JSON 日志文件记录已发送好友。
-    *   **Vision Check**: 通过 OCR 识别聊天记录，避免重复打扰。
-*   **🎨 Smart Matching (智能匹配)**
-    根据聊天上下文风格，自动选择最合适的祝福语模板（幽默/温馨/极简）。
-*   **🤖 AI Persona (AI 身份)**
-    明确署名“Kelly & AI 小龙虾🦞”，主打真诚与趣味。
-
----
-
-## 🛠️ Tech Stack / 技术实现
-
-*   **Core**: OpenClaw Skill System
-*   **Language**: JavaScript (Node.js)
-*   **Environment**: macOS + WeChat Desktop
-*   **Key Logic**:
-    1.  **Initialize**: 聚焦微信窗口，读取日志。
-    2.  **Iterate**: 遍历联系人列表。
-    3.  **Analyze**: 截图 + OCR 分析最近 3 条消息（判断是否是群发助手、是否已祝福）。
-    4.  **Action**: 选择对应模板（Template A/B/C）并模拟键盘输入发送。
+**特性速览：**
+- 🎯 **单发/群发** —— 一个人发，一群人发，一视同仁
+- 📝 **灵活输入** —— 命令行、文件、多行消息，随你折腾
+- 🛡️ **演习模式** —— 先 dry-run 看效果，别真发出去社死
+- ⏱️ **智能间隔** —— 随机延迟，假装是真人手动发的
+- 📜 **完整日志** —— JSONL 格式，事后好甩锅
 
 ---
 
-## 📦 Usage / 安装与使用
+## 🚀 快速开始
 
-### Prerequisites / 前置条件
-*   macOS 系统
-*   微信 Mac 客户端
-*   OpenClaw CLI 环境
+### 环境要求
 
-### Installation / 运行步骤
-1.  克隆本项目到本地：
-    ```bash
-    git clone https://github.com/mr-kelly/wxclaw2026.git
-    cd wxclaw2026
-    ```
-2.  将 Skill 文件移动到 OpenClaw 的 workspace 或直接运行脚本。
-3.  在 OpenClaw 中呼叫：
-    > "KK 发春节祝福" 或 "KK run wechat greeter"
+- macOS 10.15+
+- 微信 Mac 客户端（3.0+）
+- Node.js 18+（`brew install node`）
+
+### 权限设置（⚠️ 必做，否则没反应）
+
+1. **登录微信**，保持在线状态
+2. **授予辅助功能权限**：
+   - 系统设置 → 隐私与安全性 → 辅助功能
+   - 添加你的终端（Terminal / iTerm2）
+3. **自动化权限** —— 运行时系统会弹窗，点「允许」
+
+> 💡 不给权限的话，脚本和微信就是「鸡同鸭讲」——它喊破喉咙，微信也不会动一下。
+
+### 安装
+
+```bash
+git clone https://github.com/20156284/wxclaw.git
+cd wxclaw
+
+# 测试一下
+./run.sh --to "张三" --msg "你好，这是一条测试消息 🎉"
+```
+
+---
+
+## 📖 使用指南
+
+### 1. 单发消息
+
+```bash
+./run.sh --to "好友昵称" --msg "消息内容"
+```
+
+### 2. 多人群发（三种姿势）
+
+```bash
+# 方式一：多次 --to
+./run.sh --to "张三" --to "李四" --to "王五" --msg "群发通知"
+
+# 方式二：逗号分隔（适合人不多）
+./run.sh --to "张三,李四,王五" --msg "大家好"
+
+# 方式三：文件读取（适合 200 人名单）
+./run.sh --to-file friends.txt --msg "统一消息"
+```
+
+### 3. 从文件读取消息（支持多行）
+
+```bash
+./run.sh --to-file friends.txt --msg-file msg.txt
+```
+
+**friends.txt 格式：**
+```
+张三
+李四
+王五
+```
+
+**msg.txt 格式：**
+```
+亲爱的朋友，
+
+春节快乐！
+新的一年万事如意 🧧
+
+—— 你的 AI 助理
+```
+
+### 4. 演习模式（强烈推荐先用这个）
+
+```bash
+./run.sh --to-file friends.txt --msg-file msg.txt --dry-run
+```
+
+只打印流程，不真发。确认没问题再去轰炸好友。
 
 ---
 
-## 🧧 Support / 赞赏
+## 🔧 参数说明
 
-如果觉得有用，发个红包当压岁钱 🧧
-（Skill 源代码已开源，需要的自己拿去，还在持续进化中）
-
-<img src="redpack.jpg" width="300" />
-
-## ⚠️ Disclaimer / 免责声明
-
-**温馨提示：自动发送有平台风险，后果自负。**
-请合理使用工具，避免对他人造成骚扰。
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `--to` | 好友昵称，可重复或用逗号分隔 | - |
+| `--to-file` | 好友列表文件，每行一个 | - |
+| `--msg` | 消息内容 | - |
+| `--msg-file` | 消息文件（支持多行） | - |
+| `--interval-min` | 最小间隔（毫秒） | 1200 |
+| `--interval-max` | 最大间隔（毫秒） | 2600 |
+| `--dry-run` | 演习模式，不发送 | false |
+| `--help` | 查看帮助 | - |
 
 ---
-*Generated with [Claude Code](https://claude.com/claude-code)*
+
+## 📊 日志记录
+
+所有操作记录在 `log/wechat_friend_message_log.jsonl`：
+
+```jsonl
+{"time":"2026-02-28T09:30:00.000Z","friend":"张三","status":"sent","messagePreview":"你好..."}
+{"time":"2026-02-28T09:30:02.345Z","friend":"李四","status":"sent","messagePreview":"你好..."}
+{"time":"2026-02-28T09:30:05.678Z","friend":"王五","status":"skipped_not_found","error":"未找到该好友"}
+```
+
+用 `jq` 分析：
+
+```bash
+# 看成功发送的
+cat log/wechat_friend_message_log.jsonl | jq 'select(.status == "sent")'
+
+# 统计结果
+cat log/wechat_friend_message_log.jsonl | jq -s 'group_by(.status) | map({status: .[0].status, count: length})'
+```
+
+---
+
+## 🔌 在 OpenClaw 中使用
+
+如果你用 [OpenClaw](https://github.com/openclaw/openclaw) AI 助手，可以直接让 AI 帮你发：
+
+> *你：运行 wxclaw，给张三发消息说今晚有空吗？*  
+> *AI：好的，正在执行...*
+
+安装：
+
+```bash
+cp -r wxclaw ~/.openclaw/workspace/skills/
+```
+
+---
+
+## ⚠️ 注意事项
+
+1. **权限！权限！权限！** 重要的事情说三遍。
+
+2. **微信风控** —— 别发太猛：
+   - 间隔建议 3-5 秒以上
+   - 一次别超过几十个
+   - 别发营销内容
+
+3. **昵称匹配** —— 脚本用 `Cmd+F` 搜索，要确保是**对方在微信里显示的名字**（不是你给TA的备注）。
+
+4. **别动鼠标** —— 发送过程中让脚本自己跑，你别抢戏。
+
+5. **免责声明** —— 工具无罪，使用的人要有节操。骚扰他人、违反微信规则的后果自负。
+
+---
+
+## 🛠️ 工作原理
+
+```
+1. 激活微信窗口
+2. 对每个好友：
+   ├─ Cmd+F 打开搜索
+   ├─ 输入昵称，回车
+   ├─ 检查是否进入会话
+   ├─ 写剪贴板 → 粘贴 → Ctrl+Enter 发送
+   └─ 随机等待，继续下一位
+3. 写日志，收工
+```
+
+核心技术：AppleScript + System Events
+
+---
+
+## 📝 Changelog
+
+- **2026-02-28** — 完善 run.sh，统一环境变量
+- **2026-02** — 初始版本，支持单发/批量/演习
+
+---
+
+## 📄 License
+
+MIT
+
+> *"春节祝福 200 条，手写？不存在的。*  
+> *写个脚本，优雅地发送，才是程序员的浪漫。"* 🎆
