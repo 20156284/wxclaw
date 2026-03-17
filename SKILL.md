@@ -1,74 +1,138 @@
-# WeChat Chinese New Year Greeter (AI Lobster Edition 🦞)
+# wxclaw - WeChat 自動發消息
 
 ## Description
-这是一个自动化技能，用于在 Mac 微信客户端上执行“智能春节祝福发送”任务。
-它具备以下核心特性：
-1.  **状态记忆**：记录发送进度，支持断点续传。
-2.  **双重防重**：检查日志文件 + 视觉识别聊天记录，防止重复打扰。
-3.  **智能匹配**：根据聊天上下文风格，自动选择最合适的祝福语模板（幽默/温馨/极简）。
-4.  **AI 身份**：明确署名“Kelly & AI 小龙虾🦞”，主打真诚与趣味。
+Mac 微信自動化發消息工具，透過 AppleScript + System Events 控制微信客戶端，支援指定好友發送消息。
 
 ## Usage
-用户呼叫 "KK 发春节祝福" 或 "KK run wechat greeter" 时触发。
 
-## Configuration
-- **Log File**: `~/.openclaw/workspace/wechat_cny_2026_log.json`
-- **Delay**: 每发送 1 人后随机等待 3-8 秒。
-- **Batch**: 建议每次运行处理 20-30 人后暂停。
+### 單發消息
+```bash
+./run.sh --to "好友名" --msg "消息内容"
+```
 
-## Greeting Templates (Dynamic Selection)
+### 群發消息
+```bash
+# 多個好友
+./run.sh --to "张三" --to "李四" --to "王五" --msg "群发通知"
 
-### Template A (Funny/Close Friends)
-> 🧨 新春快乐！
->
-> 我是 Kelly 的 AI 助理「小龙虾🦞」，奉主人之命，特意翻山越岭爬过网线来给您拜年啦！
-> 祝您在 2026 马年：
-> 🐎 马力全开，Bug 全退散！
-> 💰 钱包鼓鼓，发量多多！
->
-> (本条祝福由 Kelly 亲自监制，小龙虾人工+智能发送，诚意 100%！🧧)
-> —— Kelly & 🦞小龙虾 敬上
+# 逗號分隔
+./run.sh --to "张三,李四,王五" --msg "大家好"
 
-### Template B (Warm/Business/Respectful)
-> 🎉 马年大吉！
->
-> 我是 Kelly 的专属 AI「小龙虾🦞」。Kelly 让我一定要在这个特别的时刻，把最热乎的祝福送到您手里！
-> 愿新的一年，您的生活如代码般逻辑通顺，事业如 API 般响应迅速！身体健康，万事顺遂！
->
-> (Kelly 正在欢度春节，派我来送个大红包……的表情包！🧧)
-> —— Kelly Chan 祝您新春快乐！
+# 文件讀取
+./run.sh --to-file friends.txt --msg-file msg.txt
+```
 
-### Template C (Simple/General/Acquaintances)
-> 🚀 2026 新春快乐！
->
-> Kelly 派我——AI 小龙虾🦞 来给您拜年了！
-> 祝您马年行大运，马到成功！🐎✨
->
-> (已执行指令：`Send_Blessing --to=You --amount=Max` ✅)
-> —— from Kelly & AI Bot
+### 演习模式
+```bash
+./run.sh --to-file friends.txt --msg "测试" --dry-run
+```
 
-## Execution Logic (Step-by-Step)
+## 操作流程（技術細節）
 
-1.  **Initialize**:
-    - Check/Create `wechat_cny_2026_log.json`.
-    - Focus WeChat window.
+發送消息時嘅實際操作步驟：
 
-2.  **Iterate Contacts** (Requires manual scroll or keyboard arrow down):
-    - **Step 2.1**: Select next contact.
-    - **Step 2.2**: `peekaboo image` (Capture chat area).
-    - **Step 2.3**: `ocr` / `vision` (Analyze last 3 messages).
-        - *Check 1*: Is it a special account (WeChat Team, File Transfer)? -> SKIP.
-        - *Check 2*: Did we/they already say "春节快乐", "Happy CNY"? -> SKIP & LOG.
-        - *Check 3*: Determine vibe (Casual vs Formal).
+1. **打開並聚焦微信**
+   - 檢查微信係咪運行中，唔係就自動開啟
+   - 將微信窗口設置到最前 (set frontmost)
+   - 調整窗口大小同位置
 
-3.  **Action**:
-    - Select Template A, B, or C based on Vibe.
-    - Type message (simulate typing).
-    - Press Enter.
-    - Log success to JSON.
-    - Random sleep (3-8s).
+2. **去聊天列表**
+   - 發送 `Cmd+2` 切換到聊天列表頁面
+   - 確保喺正確嘅界面先開始搜索
 
-4.  **Loop**: Continue to next contact until User Stop or Batch Limit.
+3. **搜索並打開好友**
+   - `Cmd+F` 打開搜索框
+   - **寫入剪貼板** (`pbcopy`) 將好友名稱放入系統剪貼板
+   - `Cmd+V` paste 名稱到搜索框
+   - 按 `Enter` 確認並選擇第一個結果
+   - 等待界面切換到對話框
 
-## Script Path
-`/Users/kelly/Documents/kagents/scripts/cron/wechat-greeter.js` (To be created)
+4. **發送消息**
+   - **寫入剪貼板** 將消息內容放入系統剪貼板
+   - `Cmd+V` paste 到輸入框
+   - **隨機延遲** 0.5-1.3 秒（模擬真人打字）
+   - 按 `Enter` 發送消息
+
+## 文件編碼
+
+**必須使用 UTF-8 格式**
+
+所有文件（包括本 SKILL.md、JS 腳本、消息文件）都必須以 UTF-8 編碼保存，以確保中文正確顯示。
+
+## 參數說明
+
+| 參數 | 說明 | 默認值 |
+|------|------|--------|
+| --to | 好友暱稱（可重複或用逗號分隔） | - |
+| --to-file | 好友列表文件（每行一個） | - |
+| --msg | 消息內容 | - |
+| --msg-file | 消息文件（支援多行） | - |
+| --dry-run | 演习模式（唔真發，只打印流程） | false |
+
+## 前置要求
+
+### 1. 微信 Mac 客戶端
+- 必須安裝微信 Mac 版（3.0+）
+- 需要登入並保持**在線狀態**
+
+### 2. 輔助功能權限（重要！）
+**系統設置 → 隱私與安全性 → 輔助功能**
+
+必須添加你嘅終端機：
+- Terminal.app 或
+- iTerm2 或
+- 你運行腳本嘅任何終端
+
+### 3. 自動化權限
+首次運行時，系統會彈窗問「是否允許控制 WeChat」：
+- 必須點「**允許**」
+- 如果唔小心拒絕咗，要去「系統設置 → 隱私與安全性 → 自動化」開返
+
+## 注意事項
+
+### 微信風控
+- 間隔建議 2-4 秒以上（已內置隨機延遲）
+- 一次唔好超過幾十個
+- 唔好發營銷內容或太頻繁
+
+### 暱稱匹配
+- 要用對方喺微信顯示嘅**真實暱稱**
+- 唔係你改嘅備註名
+- 如果有重名，會選擇搜索結果第一個
+
+### 發送過程中
+- **唔好郁鼠標** — 等腳本自己跑
+- **唔好切換窗口** — 會干擾 AppleScript
+- 唔好按任何鍵
+
+## 故障排除
+
+### 「✅ 已發送」但朋友冇收到
+- 檢查暱稱係咪正確（要對方設置嘅名，唔係你改嘅備註）
+- 檢查輔助功能權限係咪已俾
+- 試吓 `--dry-run` 睇流程
+
+### 微信冇彈起
+- 檢查微信係咪已經開咗
+- 檢查自動化權限
+
+### 中文亂碼
+- 確保文件係 UTF-8 編碼
+- 檢查 `LANG` 同 `LC_ALL` 環境變數
+
+## 文件路徑
+
+- Skill: `~/.openclaw/workspace/skills/wxclaw/`
+- 指定好友發送: `wechat-sender.js`
+- 自動掃描聯絡人: `wechat-greeter.js`
+
+## 技術實現
+
+- **AppleScript** + **System Events** — 控制 GUI
+- **osascript** — 執行 AppleScript
+- **pbcopy** — 寫入系統剪貼板
+- **Swift + Vision** — OCR 識別（greeter 版用）
+
+## 免責聲明
+
+工具無罪，使用要有節操。騷擾他人、違反微信規則嘅後果自負。
